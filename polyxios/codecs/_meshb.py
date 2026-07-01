@@ -4,6 +4,7 @@ import mmap
 from pathlib import Path
 import struct
 from typing import Any
+import warnings
 
 import numpy as np
 
@@ -13,17 +14,20 @@ from polyxios.exceptions import CodecError
 
 EXTENSION: str = ".meshb"
 
-# GmFlib keyword codes
+# GmFlib keyword codes — decoded sections
 _KW_VERSION = 1
 _KW_DIMENSION = 3
 _KW_VERTICES = 4
-# _KW_EDGES (5) is in elem_rec_sizes so scanning can advance past edge sections,
-# but edges are not decoded or written — they carry no PolyData element type.
-_KW_EDGES = 5
 _KW_TRIANGLES = 6
 _KW_QUADRILATERALS = 7
 _KW_TETRAHEDRA = 8
 _KW_HEXAHEDRA = 10
+
+# GmFlib keyword codes — scanned (record size known) but not decoded
+_KW_EDGES = 5  # 2 node indices + ref
+_KW_PRISMS = 9  # 6 node indices + ref
+_KW_NORMALS = 60  # dim floats, no ref (size is dim-dependent)
+
 _KW_END = 54
 
 # Keyword → (polyxios element name, nodes per element)
@@ -40,6 +44,22 @@ _ELEM_TO_KW: dict[str, int] = {
     "hexahedron": _KW_HEXAHEDRA,
 }
 
+# Fixed record sizes (bytes) for keywords that are scanned but not decoded.
+# Lets the scanner skip over INRIA extras (corners, ridges, normals-at-vertices,
+# required-* lists) without failing. Anything absent here → UserWarning + stop.
+_SKIP_REC: dict[int, int] = {
+    _KW_EDGES: 2 * 4 + 4,
+    _KW_PRISMS: 6 * 4 + 4,
+    13: 1 * 4,  # GmfCorners: 1 vertex index, no ref
+    14: 1 * 4,  # GmfRidges: 1 edge index, no ref
+    15: 1 * 4,  # GmfRequiredVertices
+    16: 1 * 4,  # GmfRequiredEdges
+    17: 1 * 4,  # GmfRequiredTriangles
+    18: 1 * 4,  # GmfRequiredQuadrilaterals
+    19: 1 * 4,  # GmfRequiredTetrahedra
+    61: 2 * 4,  # GmfNormalAtVertices: vertex_idx + normal_idx
+}
+
 
 def read(path: Path | str) -> PolyData:
     """Parse a Medit binary mesh file (.meshb) and return a PolyData.
@@ -52,14 +72,13 @@ def read(path: Path | str) -> PolyData:
     Returns
     -------
     PolyData
-        Parsed mesh. Element reference integers are stored in
-        element_attrs["ref"] as int32.
+        Parsed mesh. element_attrs["ref"] is populated only when at least
+        one element carries a non-zero reference tag.
 
     Raises
     ------
     CodecError
-        On unrecognised magic number, unsupported version, truncated data,
-        or unknown GmFlib keyword that prevents section scanning.
+        On unrecognised magic number, unsupported version, or truncated data.
     """
     path = Path(path)
     with open(path, "rb") as fh:
@@ -89,16 +108,22 @@ def write(poly: PolyData, path: Path | str, **opts: Any) -> None:
     n_elems = len(poly.element_types)
     dim = poly.vertices.shape[1]
 
-    # Group elements by type to emit sections
-    groups: dict[int, list[int]] = {}
-    for i in range(n_elems):
-        name = ELEMENT_TYPES_INV.get(int(poly.element_types[i]), "")
-        kw = _ELEM_TO_KW.get(name)
-        if kw is not None:
-            groups.setdefault(kw, []).append(i)
+    # Group elements by keyword — vectorised
+    _get_kw = np.vectorize(
+        lambda c: _ELEM_TO_KW.get(ELEMENT_TYPES_INV.get(int(c), ""), -1),
+        otypes=[np.intp],
+    )
+    kw_per_elem = _get_kw(poly.element_types) if n_elems > 0 else np.empty(0, np.intp)
+    groups: dict[int, np.ndarray] = {
+        kw: np.where(kw_per_elem == kw)[0]
+        for kw in _KW_TO_ELEM
+        if np.any(kw_per_elem == kw)
+    }
 
     with open(path, "wb") as fh:
-        _wi32 = lambda v: fh.write(struct.pack("<i", v))  # noqa: E731
+
+        def _wi32(v: int) -> None:
+            fh.write(struct.pack("<i", v))
 
         # File header
         _wi32(_KW_VERSION)
@@ -116,23 +141,21 @@ def write(poly: PolyData, path: Path | str, **opts: Any) -> None:
 
         # Element sections — vectorised gather per type
         refs_attr = poly.element_attrs.get("ref")
-        for kw, indices in groups.items():
+        for kw, idx in groups.items():
             _, n_nodes = _KW_TO_ELEM[kw]
             _wi32(kw)
-            _wi32(len(indices))
-            idx = np.asarray(indices, dtype=np.intp)
+            _wi32(len(idx))
             starts = np.asarray(poly.offsets[idx], dtype=np.intp)
             flat_idx = (starts[:, None] + np.arange(n_nodes, dtype=np.intp)).ravel()
             # Medit uses 1-based indices
-            nodes = (
-                poly.connectivity[flat_idx].reshape(len(indices), n_nodes) + 1
-            ).astype(np.int32)
+            nodes = (poly.connectivity[flat_idx].reshape(len(idx), n_nodes) + 1).astype(
+                np.int32
+            )
             if refs_attr is not None:
                 refs_col = refs_attr[idx].reshape(-1, 1).astype(np.int32)
             else:
-                refs_col = np.zeros((len(indices), 1), dtype=np.int32)
-            block = np.concatenate([nodes, refs_col], axis=1)
-            fh.write(block.tobytes())
+                refs_col = np.zeros((len(idx), 1), dtype=np.int32)
+            fh.write(np.concatenate([nodes, refs_col], axis=1).tobytes())
 
         _wi32(_KW_END)
 
@@ -165,7 +188,6 @@ def _parse_header(mm: mmap.mmap) -> tuple[int, int, str]:
     if version not in (1, 2):
         raise CodecError(f".meshb version {version} not supported (expected 1 or 2).")
 
-    # Dimension keyword + value
     kw2 = struct.unpack_from(fmt_i, mm, 8)[0]
     if kw2 != _KW_DIMENSION:
         raise CodecError(
@@ -179,21 +201,26 @@ def _parse_header(mm: mmap.mmap) -> tuple[int, int, str]:
 def _scan_sections(
     mm: mmap.mmap, version: int, dim: int, endian: str
 ) -> dict[int, tuple[int, int]]:
-    """Return {keyword: (count, data_byte_offset)} for all known sections."""
+    """Return {keyword: (count, data_byte_offset)} for decodable sections.
+
+    Sections in _SKIP_REC (corners, ridges, normals, required-* lists, etc.)
+    are advanced past silently. Truly unknown keywords emit a UserWarning and
+    stop scanning early rather than raising, so partial meshes are returned
+    instead of a hard error.
+    """
     fmt_i = endian + "i"
     pos = 16  # after header (4+4+4+4 bytes)
     sections: dict[int, tuple[int, int]] = {}
     total = len(mm)
-
-    # Record sizes (bytes per record, including trailing ref int32)
     float_size = 4 if version == 1 else 8
-    vert_rec = dim * float_size + 4  # x[, y[, z]] + ref
-    elem_rec_sizes = {
+    vert_rec = dim * float_size + 4
+
+    # Decode-rec sizes for sections we actually parse into PolyData
+    decode_rec: dict[int, int] = {
         _KW_TRIANGLES: 3 * 4 + 4,
         _KW_QUADRILATERALS: 4 * 4 + 4,
         _KW_TETRAHEDRA: 4 * 4 + 4,
         _KW_HEXAHEDRA: 8 * 4 + 4,
-        _KW_EDGES: 2 * 4 + 4,
     }
 
     while pos + 8 <= total:
@@ -202,17 +229,26 @@ def _scan_sections(
             break
         count = struct.unpack_from(fmt_i, mm, pos + 4)[0]
         data_start = pos + 8
+
         if kw == _KW_VERTICES:
             rec = vert_rec
+            sections[kw] = (count, data_start)
+        elif kw == _KW_NORMALS:
+            rec = dim * float_size  # dim-dependent, no ref
+        elif kw in decode_rec:
+            rec = decode_rec[kw]
+            sections[kw] = (count, data_start)
+        elif kw in _SKIP_REC:
+            rec = _SKIP_REC[kw]
         else:
-            rec = elem_rec_sizes.get(kw, 0)
-        if rec == 0:
-            raise CodecError(
+            warnings.warn(
                 f".meshb: unknown keyword {kw} at file offset {pos}; "
-                "cannot determine record size. "
-                f"Supported keywords: {sorted(elem_rec_sizes) + [_KW_VERTICES]}."
+                "stopping section scan early. Some mesh data may be missing.",
+                UserWarning,
+                stacklevel=3,
             )
-        sections[kw] = (count, data_start)
+            break
+
         pos = data_start + count * rec
 
     return sections
@@ -241,32 +277,29 @@ def _decode(mm: mmap.mmap) -> PolyData:
     conn_list: list[int] = []
     offsets_list: list[int] = [0]
     types_list: list[int] = []
-    refs_list: list[int] = []
+    refs_arr_parts: list[np.ndarray] = []
 
     for kw, (elem_name, n_nodes) in _KW_TO_ELEM.items():
         if kw not in sections:
             continue
         n_elems, estart = sections[kw]
-        rec = n_nodes * 4 + 4
-        nbytes = n_elems * rec
+        nbytes = n_elems * (n_nodes * 4 + 4)
         elem_dt = np.dtype(
             [("nodes", endian + "i4", (n_nodes,)), ("ref", endian + "i4")]
         )
-        raw = bytes(mm[estart : estart + nbytes])
-        arr = np.frombuffer(raw, dtype=elem_dt)
-        # Convert 1-based to 0-based
-        conn_2d = arr["nodes"].astype(np.int32) - 1
-        refs = arr["ref"].astype(np.int32)
+        arr = np.frombuffer(bytes(mm[estart : estart + nbytes]), dtype=elem_dt)
+        conn_2d = arr["nodes"].astype(np.int32) - 1  # 1-based → 0-based
         conn_list.extend(conn_2d.ravel().tolist())
         base = offsets_list[-1]
         offsets_list.extend((base + np.arange(1, n_elems + 1) * n_nodes).tolist())
-        code = ELEMENT_TYPES.get(elem_name, 0)
-        types_list.extend([code] * n_elems)
-        refs_list.extend(refs.tolist())
+        types_list.extend([ELEMENT_TYPES.get(elem_name, 0)] * n_elems)
+        refs_arr_parts.append(arr["ref"].astype(np.int32))
 
     elem_attrs: dict[str, np.ndarray] = {}
-    if refs_list:
-        elem_attrs["ref"] = np.array(refs_list, dtype=np.int32)
+    if refs_arr_parts:
+        refs_flat = np.concatenate(refs_arr_parts)
+        if refs_flat.any():
+            elem_attrs["ref"] = refs_flat
 
     return PolyData(
         vertices=vertices,

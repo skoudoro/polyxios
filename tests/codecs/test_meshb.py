@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import struct
 
 import numpy as np
@@ -52,20 +53,18 @@ def test_binary_file_has_correct_magic(tmp_path) -> None:
     assert version == 2  # float64
 
 
-def test_ref_stored_in_element_attrs(tmp_path) -> None:
+def test_ref_not_stored_when_all_zero(tmp_path) -> None:
+    """Default (all-zero) refs are not stored to avoid false-positive ref checks."""
     poly = _tri_mesh()
     tmp = tmp_path / "mesh.meshb"
     write(poly, tmp)
     poly2 = read(tmp)
-    assert "ref" in poly2.element_attrs
-    assert len(poly2.element_attrs["ref"]) == 4
+    assert "ref" not in poly2.element_attrs
 
 
 def test_ref_roundtrip(tmp_path) -> None:
     poly = _tri_mesh()
     refs = np.array([10, 20, 30, 40], dtype=np.int32)
-    import dataclasses
-
     poly = dataclasses.replace(poly, element_attrs={"ref": refs})
     tmp = tmp_path / "mesh.meshb"
     write(poly, tmp)
@@ -88,19 +87,32 @@ def test_mixed_elements(tmp_path) -> None:
     assert len(poly2.element_types) == 2
 
 
-def test_unknown_keyword_raises(tmp_path) -> None:
-    """File with unknown GmFlib keyword before element data raises CodecError."""
-    import struct as st
-
-    from polyxios.exceptions import CodecError
-
+def test_unknown_keyword_warns(tmp_path) -> None:
+    """Unknown GmFlib keyword emits UserWarning and stops scan (partial mesh)."""
     poly = _tet_mesh()
     tmp = tmp_path / "mesh.meshb"
     write(poly, tmp)
     data = tmp.read_bytes()
-    # Inject unknown keyword 99 (count=0) just after the header (offset 16)
-    injected = data[:16] + st.pack("<ii", 99, 0) + data[16:]
+    # Inject unknown keyword 999 after the header, before vertex data.
+    # Scanner warns and stops, so result has no elements.
+    injected = data[:16] + struct.pack("<ii", 999, 0) + data[16:]
     bad = tmp_path / "bad.meshb"
     bad.write_bytes(injected)
-    with pytest.raises(CodecError, match="unknown keyword 99"):
-        read(bad)
+    with pytest.warns(UserWarning, match="unknown keyword 999"):
+        result = read(bad)
+    assert len(result.element_types) == 0
+
+
+def test_known_skip_keyword_transparent(tmp_path) -> None:
+    """GmFlib sections in _SKIP_REC (e.g. GmfCorners=13) are silently skipped."""
+    poly = _tet_mesh()
+    tmp = tmp_path / "mesh.meshb"
+    write(poly, tmp)
+    data = tmp.read_bytes()
+    # Inject GmfCorners (kw=13, count=1, 1 int32 record) before vertex data.
+    injected = data[:16] + struct.pack("<iii", 13, 1, 0) + data[16:]
+    patched = tmp_path / "patched.meshb"
+    patched.write_bytes(injected)
+    poly2 = read(patched)
+    assert len(poly2.element_types) == 1
+    np.testing.assert_allclose(poly2.vertices, poly.vertices)
