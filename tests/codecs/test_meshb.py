@@ -73,18 +73,48 @@ def test_ref_roundtrip(tmp_path) -> None:
 
 
 def test_mixed_elements(tmp_path) -> None:
+    """write reorders elements by type (tri < quad < tet < hex); roundtrip preserves content."""
+    from polyxios._element_types import ELEMENT_TYPES
+
     verts = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float64)
+    # Input order: tetra first, then triangle — write will emit triangle section first.
     poly = make_polydata(
         verts,
         [
-            ("triangle", np.array([[0, 1, 2]])),
             ("tetra", np.array([[0, 1, 2, 3]])),
+            ("triangle", np.array([[0, 1, 2]])),
         ],
     )
     tmp = tmp_path / "mesh.meshb"
     write(poly, tmp)
     poly2 = read(tmp)
     assert len(poly2.element_types) == 2
+    # After roundtrip elements are reordered: triangle first, tetra second.
+    expected_types = np.array(
+        [ELEMENT_TYPES["triangle"], ELEMENT_TYPES["tetra"]], dtype=np.uint8
+    )
+    np.testing.assert_array_equal(poly2.element_types, expected_types)
+
+
+def test_vertex_ref_roundtrip(tmp_path) -> None:
+    """Nonzero vertex reference tags survive a write/read roundtrip."""
+    poly = _tet_mesh()
+    poly = dataclasses.replace(
+        poly, vertex_attrs={"ref": np.array([1, 2, 3, 4], dtype=np.int32)}
+    )
+    tmp = tmp_path / "mesh.meshb"
+    write(poly, tmp)
+    poly2 = read(tmp)
+    np.testing.assert_array_equal(poly2.vertex_attrs["ref"], [1, 2, 3, 4])
+
+
+def test_vertex_ref_not_stored_when_all_zero(tmp_path) -> None:
+    """All-zero vertex refs (default) are not stored."""
+    poly = _tet_mesh()
+    tmp = tmp_path / "mesh.meshb"
+    write(poly, tmp)
+    poly2 = read(tmp)
+    assert "ref" not in poly2.vertex_attrs
 
 
 def test_unknown_keyword_warns(tmp_path) -> None:

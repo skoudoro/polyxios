@@ -8,7 +8,7 @@ import warnings
 
 import numpy as np
 
-from polyxios._element_types import ELEMENT_TYPES, ELEMENT_TYPES_INV
+from polyxios._element_types import ELEMENT_TYPES
 from polyxios._types import PolyData
 from polyxios.exceptions import CodecError
 
@@ -30,7 +30,8 @@ _KW_NORMALS = 60  # dim floats, no ref (size is dim-dependent)
 
 _KW_END = 54
 
-# Keyword → (polyxios element name, nodes per element)
+# Keyword → (polyxios element name, nodes per element).
+# Insertion order defines the write and read section order: tri < quad < tetra < hex.
 _KW_TO_ELEM: dict[int, tuple[str, int]] = {
     _KW_TRIANGLES: ("triangle", 3),
     _KW_QUADRILATERALS: ("quad", 4),
@@ -60,6 +61,15 @@ _SKIP_REC: dict[int, int] = {
     61: 2 * 4,  # GmfNormalAtVertices: vertex_idx + normal_idx
 }
 
+# O(1) lookup array: element_type_code → meshb keyword (-1 = unsupported).
+# Index with np.minimum(codes, len-1) so out-of-range codes hit the -1 sentinel.
+_max_type_code = max(ELEMENT_TYPES.values(), default=0)
+_TYPE_KW_LUT: np.ndarray = np.full(_max_type_code + 2, np.intp(-1), dtype=np.intp)
+for _name, _kw in _ELEM_TO_KW.items():
+    _code = ELEMENT_TYPES.get(_name)
+    if _code is not None:
+        _TYPE_KW_LUT[_code] = _kw
+
 
 def read(path: Path | str) -> PolyData:
     """Parse a Medit binary mesh file (.meshb) and return a PolyData.
@@ -72,8 +82,10 @@ def read(path: Path | str) -> PolyData:
     Returns
     -------
     PolyData
-        Parsed mesh. element_attrs["ref"] is populated only when at least
-        one element carries a non-zero reference tag.
+        Parsed mesh. Elements are returned grouped by type in the fixed order
+        triangles → quads → tetrahedra → hexahedra, regardless of the order
+        they appear in the file. vertex_attrs["ref"] and element_attrs["ref"]
+        are populated only when at least one tag is non-zero.
 
     Raises
     ------
@@ -92,9 +104,11 @@ def read(path: Path | str) -> PolyData:
 def write(poly: PolyData, path: Path | str, **opts: Any) -> None:
     """Serialise PolyData to a Medit binary mesh file (.meshb).
 
-    Writes version 2 (float64, 32-bit counts). If element_attrs["ref"] is
-    present, those integers are written as section reference tags; otherwise
-    reference tags default to 0.
+    Writes version 2 (float64, 32-bit counts). Elements are written grouped
+    by type in the fixed order triangles → quads → tetrahedra → hexahedra;
+    the original element ordering in ``poly`` is not preserved. If
+    element_attrs["ref"] is present those integers are written as section
+    reference tags; otherwise reference tags default to 0.
 
     Parameters
     ----------
@@ -108,12 +122,12 @@ def write(poly: PolyData, path: Path | str, **opts: Any) -> None:
     n_elems = len(poly.element_types)
     dim = poly.vertices.shape[1]
 
-    # Group elements by keyword — vectorised
-    _get_kw = np.vectorize(
-        lambda c: _ELEM_TO_KW.get(ELEMENT_TYPES_INV.get(int(c), ""), -1),
-        otypes=[np.intp],
-    )
-    kw_per_elem = _get_kw(poly.element_types) if n_elems > 0 else np.empty(0, np.intp)
+    # Map element type codes → meshb keywords via LUT (pure numpy, O(n))
+    if n_elems > 0:
+        type_codes = poly.element_types.astype(np.intp)
+        kw_per_elem = _TYPE_KW_LUT[np.minimum(type_codes, len(_TYPE_KW_LUT) - 1)]
+    else:
+        kw_per_elem = np.empty(0, dtype=np.intp)
     groups: dict[int, np.ndarray] = {
         kw: np.where(kw_per_elem == kw)[0]
         for kw in _KW_TO_ELEM
@@ -137,6 +151,9 @@ def write(poly: PolyData, path: Path | str, **opts: Any) -> None:
         vert_dt = np.dtype([("xyz", "<f8", (dim,)), ("ref", "<i4")])
         buf = np.zeros(n_verts, dtype=vert_dt)
         buf["xyz"] = poly.vertices[:, :dim]
+        vref = poly.vertex_attrs.get("ref")
+        if vref is not None:
+            buf["ref"] = vref
         fh.write(buf.tobytes())
 
         # Element sections — vectorised gather per type
@@ -215,13 +232,8 @@ def _scan_sections(
     float_size = 4 if version == 1 else 8
     vert_rec = dim * float_size + 4
 
-    # Decode-rec sizes for sections we actually parse into PolyData
-    decode_rec: dict[int, int] = {
-        _KW_TRIANGLES: 3 * 4 + 4,
-        _KW_QUADRILATERALS: 4 * 4 + 4,
-        _KW_TETRAHEDRA: 4 * 4 + 4,
-        _KW_HEXAHEDRA: 8 * 4 + 4,
-    }
+    # Derived from _KW_TO_ELEM so any new element type automatically gets the right size
+    decode_rec: dict[int, int] = {kw: n * 4 + 4 for kw, (_, n) in _KW_TO_ELEM.items()}
 
     while pos + 8 <= total:
         kw = struct.unpack_from(fmt_i, mm, pos)[0]
@@ -263,21 +275,24 @@ def _decode(mm: mmap.mmap) -> PolyData:
 
     # --- Vertices ---
     vertices = np.zeros((0, 3), dtype=np.float64)
+    vertex_attrs: dict[str, np.ndarray] = {}
     if _KW_VERTICES in sections:
         n_verts, vstart = sections[_KW_VERTICES]
-        rec = dim * float_size + 4
-        nbytes = n_verts * rec
+        nbytes = n_verts * (dim * float_size + 4)
         vert_dt = np.dtype([("xyz", float_dt, (dim,)), ("ref", endian + "i4")])
         verts_arr = np.frombuffer(bytes(mm[vstart : vstart + nbytes]), dtype=vert_dt)
         xyz = verts_arr["xyz"].astype(np.float64)
         vertices = np.zeros((n_verts, 3), dtype=np.float64)
         vertices[:, :dim] = xyz
+        vrefs = verts_arr["ref"].astype(np.int32)
+        if vrefs.any():
+            vertex_attrs["ref"] = vrefs
 
-    # --- Elements ---
-    conn_list: list[int] = []
-    offsets_list: list[int] = [0]
-    types_list: list[int] = []
+    # --- Elements — all numpy, no Python list accumulation ---
+    conn_parts: list[np.ndarray] = []
+    types_parts: list[np.ndarray] = []
     refs_arr_parts: list[np.ndarray] = []
+    elem_sizes: list[int] = []  # n_nodes per element, length = total n_elems
 
     for kw, (elem_name, n_nodes) in _KW_TO_ELEM.items():
         if kw not in sections:
@@ -288,12 +303,12 @@ def _decode(mm: mmap.mmap) -> PolyData:
             [("nodes", endian + "i4", (n_nodes,)), ("ref", endian + "i4")]
         )
         arr = np.frombuffer(bytes(mm[estart : estart + nbytes]), dtype=elem_dt)
-        conn_2d = arr["nodes"].astype(np.int32) - 1  # 1-based → 0-based
-        conn_list.extend(conn_2d.ravel().tolist())
-        base = offsets_list[-1]
-        offsets_list.extend((base + np.arange(1, n_elems + 1) * n_nodes).tolist())
-        types_list.extend([ELEMENT_TYPES.get(elem_name, 0)] * n_elems)
+        conn_parts.append(arr["nodes"].astype(np.int32).ravel() - 1)  # 0-based
+        types_parts.append(
+            np.full(n_elems, ELEMENT_TYPES.get(elem_name, 0), dtype=np.uint8)
+        )
         refs_arr_parts.append(arr["ref"].astype(np.int32))
+        elem_sizes.extend([n_nodes] * n_elems)
 
     elem_attrs: dict[str, np.ndarray] = {}
     if refs_arr_parts:
@@ -301,10 +316,18 @@ def _decode(mm: mmap.mmap) -> PolyData:
         if refs_flat.any():
             elem_attrs["ref"] = refs_flat
 
+    sizes_arr = np.asarray(elem_sizes, dtype=np.int32)
+    offsets = np.concatenate([[0], np.cumsum(sizes_arr)]).astype(np.int32)
+
     return PolyData(
         vertices=vertices,
-        connectivity=np.array(conn_list, dtype=np.int32),
-        offsets=np.array(offsets_list, dtype=np.int32),
-        element_types=np.array(types_list, dtype=np.uint8),
+        connectivity=np.concatenate(conn_parts).astype(np.int32)
+        if conn_parts
+        else np.empty(0, np.int32),
+        offsets=offsets,
+        element_types=np.concatenate(types_parts)
+        if types_parts
+        else np.empty(0, np.uint8),
+        vertex_attrs=vertex_attrs,
         element_attrs=elem_attrs,
     )
