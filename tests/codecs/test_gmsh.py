@@ -284,7 +284,7 @@ def test_phys_tag_survives_roundtrip(tmp_path: Path) -> None:
     np.testing.assert_array_equal(poly2.element_attrs["phys_tag"], [3, 3, 8])
 
 
-def test_physical_names_become_element_tags(tmp_path: Path) -> None:
+def test_issue_1356_physical_names_become_element_tags(tmp_path: Path) -> None:
     text = (
         "$MeshFormat\n2.2 0 8\n$EndMeshFormat\n"
         '$PhysicalNames\n1\n2 5 "outer wall"\n$EndPhysicalNames\n'
@@ -309,7 +309,9 @@ def test_physical_names_roundtrip(tmp_path: Path) -> None:
     np.testing.assert_array_equal(poly2.element_tags["skin"], [0, 1])
 
 
-def test_element_tags_without_phys_tag_get_generated_ids(tmp_path: Path) -> None:
+def test_issue_536_every_group_gets_a_tag_of_its_own_on_write(
+    tmp_path: Path,
+) -> None:
     poly = _tri_mesh()
     tagged = make_polydata(
         poly.vertices, [("triangle", poly.connectivity.reshape(3, 3))]
@@ -394,7 +396,9 @@ def test_physical_name_keeps_members_of_other_dimensions(tmp_path: Path) -> None
     np.testing.assert_array_equal(poly.element_tags["region"], [0, 1])
 
 
-def test_groups_sharing_a_tag_across_dimensions_roundtrip(tmp_path: Path) -> None:
+def test_issue_1356_groups_sharing_a_tag_across_dimensions_roundtrip(
+    tmp_path: Path,
+) -> None:
     # A physical tag is scoped to a dimension, so a surface and a volume group
     # may both be tag 1. Dropping one of them on write would leave the survivor
     # claiming the other's elements when the file is read back.
@@ -1109,6 +1113,36 @@ def test_issue_865_mixed_cell_types_survive_a_write(tmp_path: Path) -> None:
     np.testing.assert_array_equal(back.element_types, poly.element_types)
     np.testing.assert_array_equal(back.connectivity, poly.connectivity)
     np.testing.assert_array_equal(back.offsets, poly.offsets)
+
+
+def test_issue_1257_mixed_element_types_carry_their_element_data(
+    tmp_path: Path,
+) -> None:
+    """$ElementData is one flat list, so a per-type split is what loses it.
+
+    CSR never splits, so the field stays aligned with the elements it came in
+    with however many types the mesh holds.
+    """
+    verts = np.array(
+        [[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]], dtype=np.float64
+    )
+    poly = make_polydata(
+        verts,
+        [
+            ("line", np.array([[0, 1]])),
+            ("triangle", np.array([[0, 1, 2]])),
+            ("tetra", np.array([[0, 1, 2, 3]])),
+            ("vertex", np.array([[4]])),
+        ],
+        element_attrs={"rho": np.array([1.0, 2.0, 3.0, 4.0])},
+        vertex_attrs={"temp": np.array([10.0, 20.0, 30.0, 40.0, 50.0])},
+    )
+    out = tmp_path / "mixed_data.msh"
+    write(poly, out)
+    back = read(out)
+    np.testing.assert_array_equal(back.element_types, poly.element_types)
+    np.testing.assert_allclose(back.element_attrs["rho"], [1.0, 2.0, 3.0, 4.0])
+    np.testing.assert_allclose(back.vertex_attrs["temp"], [10.0, 20, 30, 40, 50])
 
 
 def test_issue_1116_a_flat_mesh_keeps_its_zero_z(tmp_path: Path) -> None:

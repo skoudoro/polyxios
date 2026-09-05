@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 import tempfile
 
@@ -7,8 +8,14 @@ import numpy as np
 import pytest
 
 from polyxios import make_polydata
+from polyxios._element_types import ELEMENT_TYPES_INV
 from polyxios.codecs._vtk import read, write
-from polyxios.exceptions import CodecError, LazyReadError
+from polyxios.exceptions import (
+    CodecError,
+    IndexOverflowError,
+    LazyReadError,
+    UnknownElementTypeError,
+)
 from polyxios.validate import validate
 
 
@@ -81,7 +88,7 @@ def test_element_attrs() -> None:
     np.testing.assert_allclose(poly2.element_attrs["stress"], stress, atol=1e-6)
 
 
-def test_vtk_version_42_has_cells_keyword() -> None:
+def test_issue_1478_a_v42_write_spells_cells_not_offsets() -> None:
     poly = _synthetic_mesh()
     with tempfile.NamedTemporaryFile(suffix=".vtk", delete=False) as f:
         tmp = f.name
@@ -2445,3 +2452,89 @@ def test_a_field_dataset_array_of_a_negative_count_is_skipped(tmp_path) -> None:
 
     assert "backwards" not in back.global_attrs
     np.testing.assert_allclose(back.global_attrs["kept"], [7.0])
+
+
+def test_issue_768_a_connectivity_index_past_int32_is_refused(tmp_path) -> None:
+    """Legacy 4.2 spells its connectivity in 32-bit ints, so a wider index
+    would be written truncated - a silently different mesh."""
+    verts = np.zeros((4, 3), dtype=np.float64)
+    poly = make_polydata(verts, [("triangle", np.array([[0, 1, 2]]))])
+    big = dataclasses.replace(
+        poly,
+        connectivity=np.array([0, 1, 2**31], dtype=np.int64),
+        offsets=np.array([0, 3], dtype=np.int64),
+    )
+    with pytest.raises(IndexOverflowError):
+        write(big, tmp_path / "big.vtk", vtk_version="4.2")
+
+
+def test_issue_1003_an_unknown_cell_type_is_named_not_an_index_error(
+    tmp_path,
+) -> None:
+    """VTK type 99 is not in the table; looking it up must not index past it."""
+    text = (
+        "# vtk DataFile Version 4.2\n"
+        "Test mesh\n"
+        "ASCII\n"
+        "DATASET UNSTRUCTURED_GRID\n"
+        "POINTS 3 float\n"
+        "0 0 0\n1 0 0\n0 1 0\n"
+        "CELLS 1 4\n"
+        "3 0 1 2\n"
+        "CELL_TYPES 1\n"
+        "99\n"
+    )
+    out = tmp_path / "unknown.vtk"
+    out.write_text(text)
+    with pytest.raises(UnknownElementTypeError):
+        read(out)
+
+
+@pytest.mark.parametrize(
+    ("code", "name"),
+    [
+        (68, "lagrange_curve"),
+        (69, "lagrange_triangle"),
+        (71, "lagrange_tetrahedron"),
+        (72, "lagrange_hexahedron"),
+    ],
+)
+def test_issue_1003_a_lagrange_cell_type_is_read_rather_than_refused(
+    tmp_path, code: int, name: str
+) -> None:
+    """The high-order codes are real VTK types; the table has to carry them."""
+    text = (
+        "# vtk DataFile Version 4.2\n"
+        "Lagrange\n"
+        "ASCII\n"
+        "DATASET UNSTRUCTURED_GRID\n"
+        "POINTS 3 float\n"
+        "0 0 0\n1 0 0\n0 1 0\n"
+        "CELLS 1 4\n"
+        "3 0 1 2\n"
+        "CELL_TYPES 1\n"
+        f"{code}\n"
+    )
+    out = tmp_path / "lagrange.vtk"
+    out.write_text(text)
+    poly = read(out)
+    assert ELEMENT_TYPES_INV[int(poly.element_types[0])] == name
+
+
+def test_issue_1457_a_rank_two_element_attr_is_written_as_tensors(tmp_path) -> None:
+    """A 3x3 per element is a TENSORS array; a FIELD block reads back flat."""
+    verts = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float64)
+    stress = np.eye(3)[np.newaxis, :, :].repeat(2, axis=0)
+    poly = make_polydata(
+        verts,
+        [("triangle", np.array([[0, 1, 2], [0, 1, 3]]))],
+        element_attrs={"stress": stress},
+    )
+    out = tmp_path / "tensor.vtk"
+    write(poly, out)
+    content = out.read_text()
+    assert "TENSORS" in content
+    assert "FIELD FieldData" not in content
+
+    back = read(out)
+    assert back.element_attrs["stress"].shape == (2, 3, 3)
