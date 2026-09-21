@@ -7,20 +7,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="MFEM mesh" />
+<meta property="og:title" content="SVG" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://polyxios.org/stable/formats/mfem.html" />
+<meta property="og:url" content="https://polyxios.org/stable/formats/svg.html" />
 <meta property="og:site_name" content="polyxios" />
-<meta property="og:description" content=".mesh read + write eager Summary of the specification: An MFEM mesh file opens with a MFEM mesh v1.0 version line and is then a sequence of named sections, each a keyword on its own line followed b..." />
+<meta property="og:description" content=".svg write only Summary of the specification: Scalable Vector Graphics is the W3C’s XML picture format: a&lt;svg&gt; root whose viewBox names the drawing’s coordinate extent and whose width and hei..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://polyxios.org/stable/_images/social_previews/summary_formats_mfem_7ee9a2f4.png" />
-<meta property="og:image:alt" content=".mesh read + write eager Summary of the specification: An MFEM mesh file opens with a MFEM mesh v1.0 version line and is then a sequence of named sections, each a keyword on its own line followed b..." />
-<meta name="description" content=".mesh read + write eager Summary of the specification: An MFEM mesh file opens with a MFEM mesh v1.0 version line and is then a sequence of named sections, each a keyword on its own line followed b..." />
+<meta property="og:image" content="https://polyxios.org/stable/_images/social_previews/summary_formats_svg_fccef898.png" />
+<meta property="og:image:alt" content=".svg write only Summary of the specification: Scalable Vector Graphics is the W3C’s XML picture format: a&lt;svg&gt; root whose viewBox names the drawing’s coordinate extent and whose width and hei..." />
+<meta name="description" content=".svg write only Summary of the specification: Scalable Vector Graphics is the W3C’s XML picture format: a&lt;svg&gt; root whose viewBox names the drawing’s coordinate extent and whose width and hei..." />
 <meta name="twitter:card" content="summary_large_image" />
 
     <meta name="robots" content="noindex, follow" />
-    <title>MFEM mesh &#8212; polyxios</title>
+    <title>SVG &#8212; polyxios</title>
   
   
   
@@ -57,7 +57,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=5a050afe"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'formats/mfem';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'formats/svg';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://polyxios.org/switcher.json';
@@ -67,11 +67,11 @@
         </script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <script src="../_static/js/homepage.js?v=0de8ffed"></script>
-    <link rel="canonical" href="https://polyxios.org/stable/formats/mfem.html" />
+    <link rel="canonical" href="https://polyxios.org/stable/formats/svg.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Netgen" href="netgen.html" />
-    <link rel="prev" title="VTK ImageData" href="vti.html" />
+    <link rel="next" title="Lazy loading" href="../lazy_loading.html" />
+    <link rel="prev" title="ANSYS Fluent" href="fluent.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.5" />
@@ -446,14 +446,14 @@
 <li class="toctree-l2"><a class="reference internal" href="vtu.html">VTK UnstructuredGrid</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vts.html">VTK StructuredGrid</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vti.html">VTK ImageData</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">MFEM mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfem.html">MFEM mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="netgen.html">Netgen</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ugrid.html">UGRID (AFLR)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="splat.html">Gaussian splat</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mdpa.html">Kratos MDPA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="permas.html">PERMAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fluent.html">ANSYS Fluent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="svg.html">SVG</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">SVG</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../lazy_loading.html">lazy_loading.rst</a></li>
@@ -531,7 +531,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Supported formats</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">MFEM mesh</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">SVG</span></li>
   </ul>
 </nav>
 </div>
@@ -548,12 +548,13 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="mfem-mesh">
-<span id="format-mfem"></span><h1>MFEM mesh<a class="headerlink" href="#mfem-mesh" title="Link to this heading">#</a></h1>
-<p class="px-badges"><code class="docutils literal notranslate"><span class="pre">.mesh</span></code> <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">+</span> <span class="pre">write</span></code> <code class="docutils literal notranslate"><span class="pre">eager</span></code></p>
+  <section id="svg">
+<span id="format-svg"></span><h1>SVG<a class="headerlink" href="#svg" title="Link to this heading">#</a></h1>
+<p class="px-badges"><code class="docutils literal notranslate"><span class="pre">.svg</span></code> <code class="docutils literal notranslate"><span class="pre">write</span> <span class="pre">only</span></code></p>
 <section id="summary-of-the-specification">
 <h2>Summary of the specification<a class="headerlink" href="#summary-of-the-specification" title="Link to this heading">#</a></h2>
-<p>An MFEM mesh file opens with a <code class="docutils literal notranslate"><span class="pre">MFEM</span> <span class="pre">mesh</span> <span class="pre">v1.0</span></code> version line and is then a sequence of named sections, each a keyword on its own line followed by a count and that many records. <code class="docutils literal notranslate"><span class="pre">dimension</span></code> fixes whether coordinates are written with two or three components. <code class="docutils literal notranslate"><span class="pre">elements</span></code> lists one element per line as an attribute, a geometry type code and its 0-based node indices; the codes run <code class="docutils literal notranslate"><span class="pre">0</span></code> point, <code class="docutils literal notranslate"><span class="pre">1</span></code> segment, <code class="docutils literal notranslate"><span class="pre">2</span></code> triangle, <code class="docutils literal notranslate"><span class="pre">3</span></code> quadrilateral, <code class="docutils literal notranslate"><span class="pre">4</span></code> tetrahedron, <code class="docutils literal notranslate"><span class="pre">5</span></code> hexahedron, <code class="docutils literal notranslate"><span class="pre">6</span></code> wedge, <code class="docutils literal notranslate"><span class="pre">7</span></code> pyramid. <code class="docutils literal notranslate"><span class="pre">boundary</span></code> uses the same record shape for the boundary elements, and <code class="docutils literal notranslate"><span class="pre">vertices</span></code> gives a count, a dimension and then one coordinate line per vertex. The format also has INLINE and NURBS variants that carry a parametric recipe rather than an explicit mesh.</p>
+<p>Scalable Vector Graphics is the W3C’s XML picture format: a <code class="docutils literal notranslate"><span class="pre">&lt;svg&gt;</span></code> root whose <code class="docutils literal notranslate"><span class="pre">viewBox</span></code> names the drawing’s coordinate extent and whose <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">height</span></code>, when present, say how large to render it. Shapes are children of the root; a <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;</span></code> is spelled by its <code class="docutils literal notranslate"><span class="pre">d</span></code> attribute as a sequence of commands - <code class="docutils literal notranslate"><span class="pre">M</span></code> moves, <code class="docutils literal notranslate"><span class="pre">L</span></code> draws a line, <code class="docutils literal notranslate"><span class="pre">Z</span></code> closes the outline - and a <code class="docutils literal notranslate"><span class="pre">&lt;g&gt;</span></code> groups shapes under shared presentation attributes such as <code class="docutils literal notranslate"><span class="pre">stroke</span></code> and <code class="docutils literal notranslate"><span class="pre">fill</span></code>. The y axis runs downward. Coordinates are unitless user space, scaled to the rendered size through the <code class="docutils literal notranslate"><span class="pre">viewBox</span></code>.</p>
+<p>An SVG is a picture, not a mesh. It carries no third coordinate, no element type and no attribute, so the mesh cannot be recovered from it: polyxios writes the format and refuses to read it.</p>
 </section>
 <section id="specification-at-a-glance">
 <h2>Specification at a glance<a class="headerlink" href="#specification-at-a-glance" title="Link to this heading">#</a></h2>
@@ -563,56 +564,50 @@
 <col style="width: 72.0%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p>header</p></td>
-<td><p>MFEM mesh v1.0</p></td>
+<tr class="row-odd"><td><p>structure</p></td>
+<td><p>XML: <code class="docutils literal notranslate"><span class="pre">&lt;svg</span> <span class="pre">viewBox=&quot;…&quot;&gt;</span></code> holding one <code class="docutils literal notranslate"><span class="pre">&lt;g&gt;</span></code> of <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;</span></code> elements</p></td>
 </tr>
-<tr class="row-even"><td><p>sections</p></td>
-<td><p>dimension, elements, boundary, vertices</p></td>
+<tr class="row-even"><td><p>element record</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;path</span> <span class="pre">class=&quot;&lt;type&gt;&quot;</span> <span class="pre">d=&quot;M</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">L</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">…</span> <span class="pre">Z&quot;&gt;</span></code>, one per element type</p></td>
 </tr>
-<tr class="row-odd"><td><p>element record</p></td>
-<td><p>&lt;attribute&gt; &lt;geometry code&gt; &lt;node indices&gt;</p></td>
+<tr class="row-odd"><td><p>coordinates</p></td>
+<td><p>the mesh’s own units, y mirrored, the top-left corner at the origin</p></td>
 </tr>
-<tr class="row-even"><td><p>geometry codes</p></td>
-<td><p>0 point, 1 segment, 2 triangle, 3 quad, 4 tet, 5 hex, 6 wedge, 7 pyramid</p></td>
+<tr class="row-even"><td><p>style</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fill=&quot;none&quot;</span> <span class="pre">stroke=&quot;black&quot;</span> <span class="pre">stroke-width=&quot;…&quot;</span></code> on the group</p></td>
 </tr>
-<tr class="row-odd"><td><p>indices</p></td>
-<td><p>0-based</p></td>
-</tr>
-<tr class="row-even"><td><p>variants</p></td>
-<td><p>INLINE (parametric recipe), NURBS (spline patches), NC-Mesh</p></td>
+<tr class="row-odd"><td><p>size</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">viewBox</span></code> always; <code class="docutils literal notranslate"><span class="pre">width</span></code> / <code class="docutils literal notranslate"><span class="pre">height</span></code> on request</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p class="px-speclink"><a class="reference external" href="https://mfem.org/mesh-format-v1.0/">Read the full MFEM mesh specification ↗</a></p>
+<p class="px-speclink"><a class="reference external" href="https://www.w3.org/TR/SVG11/">SVG 1.1 (W3C) ↗</a></p>
 </section>
 <section id="reading">
 <h2>Reading<a class="headerlink" href="#reading" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">polyxios</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
-
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">"beam.mesh"</span><span class="p">)</span>
-<span class="n">mesh</span><span class="o">.</span><span class="n">vertices</span>          <span class="c1"># (n, 3)</span>
-<span class="n">mesh</span><span class="o">.</span><span class="n">element_types</span>     <span class="c1"># element groups found in the file</span>
-</pre></div>
-</div>
+<p>Not supported. <code class="xref py py-func docutils literal notranslate"><span class="pre">polyxios.read()</span></code> raises <code class="xref py py-class docutils literal notranslate"><span class="pre">UnsupportedFormatError</span></code> naming the file, so a pipeline that tries to round-trip through <code class="docutils literal notranslate"><span class="pre">.svg</span></code> fails at once rather than at the next step.</p>
 </section>
 <section id="writing">
 <h2>Writing<a class="headerlink" href="#writing" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">px</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"out.mesh"</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">polyxios</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
+
+<span class="n">px</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"out.svg"</span><span class="p">)</span>
+<span class="n">px</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"out.svg"</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="s2">"xz"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">stroke_width</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">px</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"out.svg"</span><span class="p">,</span> <span class="n">float_fmt</span><span class="o">=</span><span class="s2">".3f"</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This codec takes no format-specific options.</p>
+<p><code class="docutils literal notranslate"><span class="pre">plane</span></code> picks the projection: <code class="docutils literal notranslate"><span class="pre">&quot;xy&quot;</span></code> (the default), <code class="docutils literal notranslate"><span class="pre">&quot;xz&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;yz&quot;</span></code>, the first axis running rightward and the second upward. <code class="docutils literal notranslate"><span class="pre">width</span></code> sets the rendered width in CSS pixels, the height following from the mesh’s aspect ratio; without it the picture fills whatever displays it. <code class="docutils literal notranslate"><span class="pre">stroke_width</span></code> is the line weight in the mesh’s own units and defaults to a hundredth of the picture’s shorter side. <code class="docutils literal notranslate"><span class="pre">float_fmt</span></code> is the format specifier for every number written, <code class="docutils literal notranslate"><span class="pre">.6g</span></code> by default; one whose fill character is an XML delimiter (<code class="docutils literal notranslate"><span class="pre">&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>) is refused, since every number lands in an attribute. Any other option is warned about and ignored.</p>
 </section>
 <section id="quirks-worth-knowing">
 <h2>Quirks worth knowing<a class="headerlink" href="#quirks-worth-knowing" title="Link to this heading">#</a></h2>
 <ul class="px-quirks simple">
-<li><p>The INLINE, NURBS and NC-Mesh variants store a recipe rather than an explicit mesh, and each is still read - what comes back differs by variant.</p></li>
-<li><p>An <code class="docutils literal notranslate"><span class="pre">MFEM</span> <span class="pre">INLINE</span></code> file is materialised into the uniform grid its <code class="docutils literal notranslate"><span class="pre">type</span></code>/<code class="docutils literal notranslate"><span class="pre">nx</span></code>/<code class="docutils literal notranslate"><span class="pre">ny</span></code>/<code class="docutils literal notranslate"><span class="pre">nz</span></code> and domain extents describe, matching MFEM’s own <code class="docutils literal notranslate"><span class="pre">MakeCartesian</span></code>, so it reads as an ordinary mesh.</p></li>
-<li><p>An <code class="docutils literal notranslate"><span class="pre">MFEM</span> <span class="pre">NURBS</span></code> file gives back its <em>control points</em>, not surface samples: the vertices are the B-spline coefficients, the connectivity is the patch topology, and the knot vectors and weights travel in <code class="docutils literal notranslate"><span class="pre">global_attrs[&quot;mfem_nurbs_knotvectors&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">global_attrs[&quot;mfem_nurbs_weights&quot;]</span></code>. Evaluating the basis to get real nodes is MFEM’s job - <code class="docutils literal notranslate"><span class="pre">SetCurvature(1)</span></code> and re-save, then read the result here.</p></li>
-<li><p>An <code class="docutils literal notranslate"><span class="pre">MFEM</span> <span class="pre">NC</span> <span class="pre">mesh</span></code> file - or <code class="docutils literal notranslate"><span class="pre">MFEM</span> <span class="pre">NC-Mesh</span></code>, the other spelling of the same header, matched whatever its case - is a forest of refinement trees, and its <em>leaves</em> are the mesh: the refined parents are stepped over, and the vertices the leaves reference are reconstructed from the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> section and the midpoint rules in <code class="docutils literal notranslate"><span class="pre">vertex_parents</span></code>. <code class="docutils literal notranslate"><span class="pre">global_attrs[&quot;mfem_nc_n_total_elements&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">global_attrs[&quot;mfem_nc_n_leaf_elements&quot;]</span></code> record both counts. The geometry is right, but hanging-node constraints are not applied, so the mesh is not FEM-conforming at a refinement boundary - re-save through PyMFEM for that.</p></li>
-<li><p>A 2-D file’s coordinates are padded with a zero z, so the mesh is 3-D like every other one polyxios holds, and <code class="docutils literal notranslate"><span class="pre">global_attrs[&quot;was_2d&quot;]</span></code> records the fact. The written <code class="docutils literal notranslate"><span class="pre">dimension</span></code> follows it, and a mesh whose <code class="docutils literal notranslate"><span class="pre">z</span></code> column is entirely zero goes out as 2-D whether it was flagged or not. A flagged mesh whose vertices have since left the plane is written in three with a warning, and a flat mesh of solid cells keeps three columns whatever the flag says - MFEM reads exactly as many coordinates per vertex as the block declares, and a tetrahedron of two-coordinate vertices is not a cell.</p></li>
-<li><p>Coordinates are written with <code class="docutils literal notranslate"><span class="pre">.10g</span></code>, which does not name a float64 exactly - a round trip differs in the last few digits.</p></li>
-<li><p>MFEM names eight geometries and no higher-order one. An element it has no geometry for - a <code class="docutils literal notranslate"><span class="pre">quadratic_tetra</span></code>, a <code class="docutils literal notranslate"><span class="pre">polygon</span></code> - is skipped on write with a warning naming its type, and the declared element count drops with it. Writing one under another geometry’s code would leave its extra nodes to be read as the record that follows, which costs every element after it rather than the one that did not fit.</p></li>
+<li><p>Coordinates go out in the mesh’s own units, shifted so the picture’s top-left corner is the origin and the upward axis mirrored, since SVG’s y grows downward; the <code class="docutils literal notranslate"><span class="pre">viewBox</span></code> is the mesh’s extent padded by half a stroke so an outline on the boundary is not clipped. Passing <code class="docutils literal notranslate"><span class="pre">width</span></code> scales the picture without touching the coordinates.</p></li>
+<li><p>Lines and faces are drawn: a line, polyline, triangle, quadrilateral, pixel, polygon or triangle strip, and the higher-order kinds of each through their corner nodes, a triangle strip as one ring per triangle. Every other element type - a vertex, a solid cell - is skipped with a warning, one per type, so a volume mesh writes as an empty picture with a warning per cell type; extract its surface first. An element of a free-size type with too few nodes to outline is skipped the same way. A vertex coordinate that is not finite is refused outright: it would leave the <code class="docutils literal notranslate"><span class="pre">viewBox</span></code> undefined and the whole picture with it.</p></li>
+<li><p>Each drawn type is one <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;</span></code> carrying the type’s name as its <code class="docutils literal notranslate"><span class="pre">class</span></code>, its elements as subpaths in mesh order, so a stylesheet can colour triangles apart from quadrilaterals. <code class="docutils literal notranslate"><span class="pre">vertex_attrs</span></code>, <code class="docutils literal notranslate"><span class="pre">element_attrs</span></code>, the tags and <code class="docutils literal notranslate"><span class="pre">global_attrs</span></code> have no spelling in a picture and are not written.</p></li>
+<li><p>The coordinate the projection drops is expected to be constant across the mesh. When it is not, the picture is still written and a warning says which axis varies and that the drawing is a projection. A flat mesh off the origin’s plane - every vertex at <code class="docutils literal notranslate"><span class="pre">z=7</span></code> - is flat and warns about nothing.</p></li>
+<li><p>A picture with no extent in one direction - a single horizontal line - takes its stroke from the other; one with no extent at all takes a stroke of one unit. Both still get a <code class="docutils literal notranslate"><span class="pre">viewBox</span></code> with area, from the padding.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.svg.gz</span></code> is written compressed like every other format. <code class="docutils literal notranslate"><span class="pre">.svgz</span></code>, the conventional name for a gzipped SVG, is not registered.</p></li>
 </ul>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -632,20 +627,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="vti.html"
+       href="fluent.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">VTK ImageData</p>
+        <p class="prev-next-title">ANSYS Fluent</p>
       </div>
     </a>
     <a class="right-next"
-       href="netgen.html"
+       href="../lazy_loading.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Netgen</p>
+        <p class="prev-next-title">Lazy loading</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -680,7 +675,7 @@
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/fury-gl/polyxios/edit/master/docs/formats/mfem.rst">
+    <a href="https://github.com/fury-gl/polyxios/edit/master/docs/formats/svg.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
