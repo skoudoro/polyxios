@@ -431,6 +431,35 @@ def test_sets_become_tags_and_information_becomes_text(tmp_path: Path) -> None:
     assert poly.global_attrs["time"] == 0.25
 
 
+def test_an_information_named_time_does_not_bury_the_time_value(
+    tmp_path: Path,
+) -> None:
+    """The <Time> value is the time; an <Information Name="time"> beside it
+    would otherwise list the two together and read as no time at all."""
+    body = _SQUARE_GRID.replace(
+        "</Grid>",
+        """
+  <Time Value="0.25"/>
+  <Information Name="time" Value="run-A"/>
+</Grid>""",
+    )
+    poly = read(_write_doc(tmp_path, body))
+    assert poly.global_attrs["time"] == 0.25
+
+
+def test_an_inline_integer_past_its_precision_is_refused(tmp_path: Path) -> None:
+    """A token too wide for the declared width must not wrap or saturate."""
+    body = _SQUARE_GRID.replace("0 1 2  1 3 2", "0 1 2  1 99999999999 2")
+    with pytest.raises(CodecError, match="not a Int of 4 byte"):
+        read(_write_doc(tmp_path, body))
+    body = _SQUARE_GRID.replace(
+        'Dimensions="2" NumberType="Float" Format="XML">0.5 0.5',
+        'Dimensions="2" NumberType="UInt" Precision="1" Format="XML">-1 0',
+    )
+    with pytest.raises(CodecError, match="not a UInt of 1 byte"):
+        read(_write_doc(tmp_path, body))
+
+
 def test_an_attribute_that_is_neither_per_point_nor_per_cell_is_skipped(
     tmp_path: Path,
 ) -> None:

@@ -719,7 +719,8 @@ def _read_information(parent: ET.Element, globals_: dict[str, Any]) -> None:
     for info in parent.findall("Information"):
         name = info.get("Name")
         # A text under the planarity key would be read as a flag on the way
-        # back out; a text "time" is harmless, and stays as text.
+        # back out; a text "time" stays as text, and a <Time> value on the
+        # same grid replaces it.
         if not name or name == "was_2d":
             continue
         value = info.get("Value")
@@ -823,6 +824,7 @@ def _read_uniform(grid: ET.Element, ctx: dict[str, Any]) -> PolyData:
     vertex_tags: dict[str, np.ndarray] = {}
     element_tags: dict[str, np.ndarray] = {}
 
+    _read_information(grid, globals_)
     for child in children:
         if child.tag == "Attribute":
             _read_attribute(
@@ -842,7 +844,6 @@ def _read_uniform(grid: ET.Element, ctx: dict[str, Any]) -> PolyData:
             )
         elif child.tag == "Time" and child.get("Value") is not None:
             globals_[_TIME_KEY] = _as_float(child.get("Value"), ctx, "Time Value")
-    _read_information(grid, globals_)
 
     return PolyData(
         vertices=vertices,
@@ -1502,11 +1503,16 @@ def _xml_values(item: ET.Element, dtype: np.dtype, ctx: dict[str, Any]) -> np.nd
             doubles = np.array(tokens, dtype=np.float64)
             if not np.all(np.mod(doubles, 1) == 0):
                 raise ValueError from None
+            limits = np.iinfo(dtype)
+            if doubles.size and (
+                doubles.min() < limits.min or doubles.max() > limits.max
+            ):
+                raise OverflowError from None
             return doubles.astype(dtype)
     except (ValueError, OverflowError):
         raise CodecError(
             f"'{ctx['name']}': an inline DataItem holds a value that is not a"
-            f" {item.get('NumberType') or 'Float'}."
+            f" {item.get('NumberType') or 'Float'} of {dtype.itemsize} byte(s)."
         ) from None
 
 
