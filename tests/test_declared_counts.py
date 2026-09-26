@@ -223,6 +223,23 @@ def _corrupt_h5m(path) -> None:
         tags.create_dataset("values", data=np.array([b"s"], dtype="S32"))
 
 
+def _corrupt_vtkhdf(path) -> None:
+    h5py = pytest.importorskip("h5py")
+    with h5py.File(path, "w") as f:
+        root = f.create_group("VTKHDF")
+        root.attrs["Version"] = np.array([2, 0], dtype=np.int64)
+        root.attrs["Type"] = np.bytes_("UnstructuredGrid")
+        root.create_dataset("NumberOfPoints", data=np.array([BIG], dtype=np.int64))
+        root.create_dataset("NumberOfCells", data=np.array([0], dtype=np.int64))
+        root.create_dataset(
+            "NumberOfConnectivityIds", data=np.array([0], dtype=np.int64)
+        )
+        root.create_dataset("Points", data=np.zeros((1, 3)))
+        root.create_dataset("Types", data=np.zeros(0, dtype=np.uint8))
+        root.create_dataset("Connectivity", data=np.zeros(0, dtype=np.int64))
+        root.create_dataset("Offsets", data=np.zeros(1, dtype=np.int64))
+
+
 def _corrupt_exodus(path) -> None:
     # A netCDF header declares its dimensions up front, so a node count no
     # file could hold costs a few bytes to spell; CDF5 is the flavour whose
@@ -237,6 +254,7 @@ CORRUPT_HDF5: dict[str, Callable] = {
     ".med": _corrupt_med,
     ".cgns": _corrupt_cgns,
     ".h5m": _corrupt_h5m,
+    ".vtkhdf": _corrupt_vtkhdf,
     ".e": _corrupt_exodus,
 }
 
@@ -269,6 +287,8 @@ _NO_DECLARED_COUNT: frozenset[str] = frozenset(
         # Bare columns: the count is the line count.
         ".xyz",
         ".vtm",
+        # An index of datasets: every count is the named file's to declare.
+        ".pvd",
         # Every vertex and triangle is an XML element of its own; no count.
         ".3mf",
         # Write-only: there is no reader for a count to reach.

@@ -26,9 +26,10 @@ import polyxios
 from polyxios.exceptions import CodecError, LazyReadError, UnsupportedFormatError
 from tests.test_roundtrip import CANONICAL, CAPABILITIES
 
-# TetGen is the one format that is not a stream: a mesh is a '.node' and an
-# '.ele' file, and the second half is found beside the first by name.
-_NEEDS_A_PATH: tuple[str, ...] = (".node", ".ele")
+# TetGen is not a stream: a mesh is a '.node' and an '.ele' file, and the
+# second half is found beside the first by name. A PVD collection is an index
+# of datasets found beside it the same way.
+_NEEDS_A_PATH: tuple[str, ...] = (".node", ".ele", ".pvd")
 
 # XDMF reads from a buffer whenever its arrays are inline, but its default
 # write sends them to an HDF5 sidecar beside the file, which a buffer has
@@ -48,7 +49,7 @@ _BUFFERABLE: tuple[str, ...] = tuple(
 # below; round-trip-through-memory tests still exercise them.
 # An HDF5 file also carries the time each object was created in its headers,
 # so two writes of one mesh agree byte for byte only within the same second.
-_HDF5: frozenset[str] = frozenset({".med", ".cgns", ".h5m", ".hmf"})
+_HDF5: frozenset[str] = frozenset({".med", ".cgns", ".h5m", ".hmf", ".vtkhdf"})
 # A nameless buffer has no ".laz" suffix to ask compression of, so it is
 # written plain unless compress=True is passed; the path write is compressed.
 _BUFFER_EQUAL: tuple[str, ...] = tuple(

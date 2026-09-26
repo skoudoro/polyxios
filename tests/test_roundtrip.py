@@ -600,6 +600,27 @@ CAPABILITIES: dict[str, Cap] = {
         requires="h5py",
     ),
     ".xml": Cap("volume", note="DOLFIN XML stores a single-type mesh only."),
+    ".vtkhdf": Cap(
+        "mixed",
+        vertex_attrs=("scalar", "vector"),
+        element_attrs=("efloat", "eint"),
+        vertex_tags=("vgroup",),
+        element_tags=("a", "b"),
+        global_attrs=("gnum", "vtkhdf_type"),
+        note="The VTK type the file was written as comes back with the mesh,"
+        " so a PolyData read is a PolyData written.",
+        requires="h5py",
+    ),
+    ".pvd": Cap(
+        "mixed",
+        vertex_attrs=("scalar", "vector"),
+        element_attrs=("efloat", "eint"),
+        vertex_tags=("vgroup",),
+        element_tags=("a", "b"),
+        global_attrs=("gnum", "time"),
+        note="A collection is a mesh over time: the one step written reads"
+        " back with its time, zero when the mesh spelled none.",
+    ),
     ".med": Cap(
         "mixed",
         vertex_attrs=("scalar", "vector"),

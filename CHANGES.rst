@@ -45,6 +45,27 @@ New features
   out as an extra bytes field. ``lazy=True`` maps an uncompressed file:
   the vertices are the int32 the file holds, the colours its ``uint16``
   and every field a view of its column.
+- VTKHDF (``.vtkhdf``), VTK's own HDF5 layout and the file ParaView is
+  moving to, is read and written behind the ``hdf5`` extra. An
+  ``UnstructuredGrid`` reads as its cells are, a ``PolyData`` with its
+  vertices, lines, polygons and strips typed by point count, an
+  ``ImageData`` expanded into the lattice its extent spans with the
+  ``vti_*`` globals a ``.vti`` carries; every partition is merged and
+  tagged ``part_<k>``, ``PointData``, ``CellData`` and ``FieldData`` are
+  the attributes and globals, and a temporal file reads one step -
+  ``step=`` on read, every step through ``helper.read_time_series``.
+  Write emits an ``UnstructuredGrid``, or a ``PolyData`` with
+  ``polydata=True`` or when the mesh was read as one, ``time=`` a
+  ``Steps`` group of one, and ``helper.write_time_series`` appends each
+  step's arrays to one file, the cells written once and the points again
+  only when they moved. Verified both ways against VTK's own reader and
+  writer, in the interop CI job as well as locally.
+- PVD (``.pvd``), ParaView's collection of datasets over time, is read and
+  written. Every dataset at one ``timestep`` is read through its own codec
+  and merged, tagged by ``group`` or ``part_<n>``, with the step's time
+  under ``global_attrs["time"]``; ``step=`` picks the step and
+  ``helper.read_time_series`` reads them all. Write puts one ``.vtu`` -
+  or the extension ``format=`` names - per step beside the index.
 - ASCII point clouds (``.xyz``, Leica ``.pts`` and ``.ptx``) are read and
   written. Columns past the coordinates are named by count and kind - an
   intensity, three whole numbers in 0..255 as ``colors``, three others as
