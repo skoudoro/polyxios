@@ -67,6 +67,7 @@ from polyxios.validate import validate_header
 
 EXTENSION: str = ".xdmf"
 EXTENSIONS: tuple[str, ...] = (".xdmf", ".xmf")
+LABEL: str = "XDMF"
 
 
 @functools.cache
@@ -2684,6 +2685,7 @@ def _set_lines(
 __all__ = [
     "EXTENSION",
     "EXTENSIONS",
+    "LABEL",
     "read",
     "read_time_series",
     "write",

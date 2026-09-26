@@ -476,14 +476,30 @@ def test_a_file_with_no_series_is_one_step_with_no_time(tmp_path) -> None:
     assert len(meshes) == 1 and np.isnan(times).all()
 
 
-def test_a_time_series_is_xdmf_only(tmp_path) -> None:
+def test_a_time_series_is_for_the_formats_that_hold_one(tmp_path) -> None:
     from polyxios.exceptions import UnsupportedFormatError
     from polyxios.helper import read_time_series, write_time_series
 
-    with pytest.raises(UnsupportedFormatError, match="only XDMF"):
+    with pytest.raises(UnsupportedFormatError, match="only XDMF .* VTKHDF .* and PVD"):
         write_time_series([(0.0, _step(0.0))], tmp_path / "run.vtu")
-    with pytest.raises(UnsupportedFormatError, match="only XDMF"):
+    with pytest.raises(UnsupportedFormatError, match="only XDMF .* VTKHDF .* and PVD"):
         read_time_series(tmp_path / "run.vtu")
+
+
+def test_the_series_refusal_names_every_codec_in_the_table(
+    tmp_path, monkeypatch
+) -> None:
+    from polyxios import helper
+    from polyxios.codecs import _vtkhdf
+    from polyxios.exceptions import UnsupportedFormatError
+
+    monkeypatch.setitem(helper._SERIES_CODECS, ".other", _vtkhdf)
+    with pytest.raises(UnsupportedFormatError, match=r"VTKHDF \(.vtkhdf, .other\)"):
+        helper.read_time_series(tmp_path / "run.vtu")
+    # The label is the codec's own, not its module name.
+    monkeypatch.setattr(_vtkhdf, "LABEL", "VTK HDF")
+    with pytest.raises(UnsupportedFormatError, match=r"VTK HDF \(.vtkhdf, .other\)"):
+        helper.read_time_series(tmp_path / "run.vtu")
 
 
 def test_a_step_whose_time_is_text_reads_as_nan(tmp_path) -> None:

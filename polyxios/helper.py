@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 import polyxios
-from polyxios.codecs import _xdmf
+from polyxios.codecs import _pvd, _vtkhdf, _xdmf
 from polyxios.exceptions import UnsupportedFormatError
 from polyxios.fetcher import fetch
 import polyxios.transforms as transforms
@@ -579,19 +579,32 @@ def visualize_mesh(
 
 # The extensions that hold a time series: several meshes at several times in
 # one file, which ``read`` hands back one step of. The whole series lives here.
-_SERIES_SUFFIXES: frozenset[str] = frozenset(_xdmf.EXTENSIONS)
+_SERIES_CODECS: dict[str, Any] = {
+    **dict.fromkeys(_xdmf.EXTENSIONS, _xdmf),
+    _vtkhdf.EXTENSION: _vtkhdf,
+    _pvd.EXTENSION: _pvd,
+}
+_SERIES_SUFFIXES: frozenset[str] = frozenset(_SERIES_CODECS)
 
 
 def _series_codec(path: str | Path, verb: str) -> Any:
     suffixes = [s.lower() for s in Path(path).suffixes]
     if suffixes and suffixes[-1] in (".gz", ".gzip"):
         suffixes = suffixes[:-1]
-    if not suffixes or suffixes[-1] not in _SERIES_SUFFIXES:
+    if not suffixes or suffixes[-1] not in _SERIES_CODECS:
         raise UnsupportedFormatError(
-            f"'{path}': only XDMF ({', '.join(sorted(_SERIES_SUFFIXES))}) holds a"
-            f" time series to {verb}."
+            f"'{path}': only {_series_formats()} hold a time series to {verb}."
         )
-    return _xdmf
+    return _SERIES_CODECS[suffixes[-1]]
+
+
+def _series_formats() -> str:
+    """The series formats as the refusal names them, from the codec table."""
+    names = []
+    for codec in dict.fromkeys(_SERIES_CODECS.values()):
+        suffixes = [s for s, c in _SERIES_CODECS.items() if c is codec]
+        names.append(f"{codec.LABEL} ({', '.join(suffixes)})")
+    return f"{', '.join(names[:-1])} and {names[-1]}" if len(names) > 1 else names[0]
 
 
 def read_time_series(path: str | Path) -> tuple[np.ndarray, list[polyxios.PolyData]]:
@@ -604,8 +617,8 @@ def read_time_series(path: str | Path) -> tuple[np.ndarray, list[polyxios.PolyDa
     Parameters
     ----------
     path
-        An ``.xdmf`` or ``.xmf`` file, the only format polyxios reads a time
-        series from.
+        An ``.xdmf`` / ``.xmf``, ``.vtkhdf`` or ``.pvd`` file, the formats
+        polyxios reads a time series from.
 
     Returns
     -------
@@ -618,8 +631,9 @@ def read_time_series(path: str | Path) -> tuple[np.ndarray, list[polyxios.PolyDa
     Raises
     ------
     UnsupportedFormatError
-        If the file is not an XDMF file, or names an HDF5 sidecar and h5py
-        is not installed.
+        If the file is not an XDMF, VTKHDF or PVD file, or is one that needs
+        h5py - a VTKHDF, an XDMF naming an HDF5 sidecar - and h5py is not
+        installed.
 
     Examples
     --------
@@ -660,19 +674,21 @@ def write_time_series(
         later mesh whose vertices moved writes its own coordinates, one
         whose elements differ is refused.
     path
-        An ``.xdmf`` or ``.xmf`` file, the only format polyxios writes a
-        time series to.
+        An ``.xdmf`` / ``.xmf``, ``.vtkhdf`` or ``.pvd`` file, the formats
+        polyxios writes a time series to.
     **opts
-        Passed to the codec: ``data_format`` (``"hdf"``, the default, needs
-        h5py; ``"xml"`` keeps the arrays inline; ``"binary"`` writes one raw
-        sidecar), ``compression`` and ``compression_opts`` for the HDF5
-        datasets.
+        Passed to the codec. XDMF takes ``data_format`` (``"hdf"``, the
+        default, needs h5py; ``"xml"`` keeps the arrays inline; ``"binary"``
+        writes one raw sidecar) and, with VTKHDF, ``compression`` and
+        ``compression_opts`` for the HDF5 datasets; PVD takes ``format``
+        for the extension of the dataset each step is written to.
 
     Raises
     ------
     UnsupportedFormatError
-        If the file is not an XDMF file, or the default HDF5 sidecar is
-        asked for and h5py is not installed.
+        If the file is not an XDMF, VTKHDF or PVD file, or is one that needs
+        h5py - a VTKHDF, an XDMF with its default HDF5 sidecar - and h5py is
+        not installed.
     CodecError
         If ``steps`` is empty, or a step's elements differ from the first's.
 

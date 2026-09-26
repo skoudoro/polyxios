@@ -31,8 +31,8 @@ or, from conda-forge:
 conda install -c conda-forge polyxios
 ```
 
-The XDMF codec keeps its arrays in an HDF5 file by default, and MED, CGNS,
-H5M and HMF are HDF5 files outright; all need
+The XDMF codec keeps its arrays in an HDF5 file by default, and VTKHDF, MED,
+CGNS, H5M and HMF are HDF5 files outright; all need
 [h5py](https://www.h5py.org/) - an optional extra:
 
 ```bash
@@ -251,6 +251,8 @@ Volumetric meshes, structured grids, and FEM/CFD simulation formats.
 | VTK StructuredGrid | `.vts` | ✓ | ✓ | curvilinear grid, cells implied by the extent (hexahedra, or quads when flat) |
 | VTK ImageData | `.vti` | ✓ | ✓ | origin/spacing/extent only, no coordinate array |
 | VTK UnstructuredGrid | `.vtu` | ✓ | ✓ | arbitrary cell-type mix |
+| VTKHDF | `.vtkhdf` | ✓ | ✓ | VTK's HDF5 layout (`polyxios[hdf5]`); UnstructuredGrid, PolyData and ImageData read, partitions merged and tagged, time series via `helper.read_time_series` / `write_time_series`, `step=` on read; writes UnstructuredGrid or `polydata=True` |
+| PVD (ParaView collection) | `.pvd` | ✓ | ✓ | XML index of VTK datasets over time; datasets at one step merged and tagged by group, `step=` on read, `helper.read_time_series` / `write_time_series`; writes one `.vtu` (`format=`) per step beside the index |
 | MFEM mesh | `.mesh`* | ✓ | ✓ | geometry type codes; INLINE is materialised, NURBS reads back control points |
 | Netgen | `.vol` | ✓ | ✓ | ASCII, points/edges/faces/cells incl. quadratic, `bcnr`/`matnr` + names → element tags |
 | UGRID (AFLR) | `.ugrid` | ✓ | ✓ | ASCII, tri/quad surface + tet/pyramid/prism/hex volume, boundary tags → element tags |
@@ -295,7 +297,7 @@ blocks = helper.read_blocks("case.vtm")  # one PolyData per sub-file
 `examples/read_parallel_vtk.py` walks through what they do. Writing an index file is not
 supported.
 
-**41 formats supported** across the 53 extensions in the tables, plus `.plt`, which
+**43 formats supported** across the 55 extensions in the tables, plus `.plt`, which
 is recognised but not read - more coming via the plugin system.
 
 ---

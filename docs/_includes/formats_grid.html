@@ -1,5 +1,5 @@
 <!--
-  The forty-one format cards, pulled into formats/index.rst by a raw:: html
+  The forty-three format cards, pulled into formats/index.rst by a raw:: html
   directive. Hrefs are relative to formats/, i.e. sibling pages.
   Every class is styled in _static/css/retro.css.
 
@@ -245,6 +245,26 @@
     <p class="px-fmtlinks">
       <a class="px-fmtread" href="vti.html">read() &#8594;</a>
       <a class="px-fmtspec" href="https://examples.vtk.org/site/VTKFileFormats/">full spec &#8599;</a>
+    </p>
+  </div>
+
+  <div class="px-fmtcard">
+    <p class="px-fmtname">VTKHDF <span class="px-fmtext">.vtkhdf</span></p>
+    <p class="px-fmtdesc">VTK's own HDF5 layout: an UnstructuredGrid, PolyData or
+      ImageData under /VTKHDF, partitioned, with its time steps inside.</p>
+    <p class="px-fmtlinks">
+      <a class="px-fmtread" href="vtkhdf.html">read() &#8594;</a>
+      <a class="px-fmtspec" href="https://docs.vtk.org/en/latest/vtk_file_formats/vtkhdf_file_format/index.html">full spec &#8599;</a>
+    </p>
+  </div>
+
+  <div class="px-fmtcard">
+    <p class="px-fmtname">PVD (ParaView collection) <span class="px-fmtext">.pvd</span></p>
+    <p class="px-fmtdesc">An XML index of VTK datasets over time, each with its
+      timestep, part and group; read at one step or as a whole series.</p>
+    <p class="px-fmtlinks">
+      <a class="px-fmtread" href="pvd.html">read() &#8594;</a>
+      <a class="px-fmtspec" href="https://docs.paraview.org/en/latest/UsersGuide/understandingData.html#pvd-files">full spec &#8599;</a>
     </p>
   </div>
 
