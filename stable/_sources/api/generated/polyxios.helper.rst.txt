@@ -8,8 +8,18 @@ polyxios.helper
 
    .. autosummary::
    
+      read_blocks
+      read_multiblock
       read_multiblock_vtp
       read_polydata
+      read_time_series
       resolve_path
       visualize_mesh
+      write_time_series
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      Traversal
    

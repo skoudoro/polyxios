@@ -5,7 +5,7 @@ Tecplot ASCII
 
 .. rst-class:: px-badges
 
-``.tec`` ``read + write`` ``eager``
+``.tec .dat`` ``read + write`` ``eager``
 
 Summary of the specification
 ----------------------------
@@ -30,7 +30,7 @@ Specification at a glance
    * - connectivity
      - 1-based node indices, one element per line
    * - other suffixes
-     - .dat is read via fmt=".tec"
+     - .dat resolves by content; .plt is binary and not read
 
 .. rst-class:: px-speclink
 
@@ -45,7 +45,7 @@ Reading
 
     mesh = px.read("model.tec")
     mesh.vertices          # (n, 3)
-    mesh.element_types     # element groups found in the file
+    mesh.element_types     # one type code per element
 
 Writing
 -------
@@ -62,8 +62,17 @@ Quirks worth knowing
 .. rst-class:: px-quirks
 
 - Both POINT and BLOCK packing are read; finite-element zones are supported, ordered (structured) zones are not.
-- Variables beyond the coordinate columns are read as named vertex attributes, so solution fields survive the round trip.
-- ``.dat`` files are recognised when the codec is named explicitly: ``px.read("flow.dat", fmt=".tec")``.
+- Only the first zone of a multi-zone file is read; the rest are skipped with a warning. A zone holds one element type, so the writer emits the first supported type it meets and skips every other element with a warning.
+- Variables beyond the coordinate columns are read as named vertex attributes - or element attributes when ``VARLOCATION`` cell-centres them - so solution fields survive the round trip. Element attributes are written back cell-centred, under BLOCK packing.
+- A zone declaring only ``X`` and ``Y`` is 2-D: the vertices are padded with a zero z and ``global_attrs["was_2d"]`` records the fact, which is what writes the zone back out with two coordinate variables rather than three. Tecplot names the coordinates by position, so a mesh carrying a variable of its own named ``Z`` keeps three: the zone would otherwise read back with that variable as its z. A mesh whose vertices have since left the plane is written in three with a warning, and a flat mesh of ``TETRAHEDRON`` or ``BRICK`` cells keeps three coordinate variables whatever the flag says - Tecplot takes the node count per element from ``ET`` and the coordinate count from ``VARIABLES``, and the two have to agree.
+- ``.dat`` is shared with Nastran, LS-DYNA and plain ASCII tables, so it is resolved by looking
+  inside the file: a ``.dat`` opening with ``TITLE = "``, ``VARIABLES =``, ``ZONE``, ``FILETYPE =``
+  or ``DATASETAUXDATA`` lands here. An unquoted ``TITLE =`` decides nothing - Nastran case
+  control spells its title the same way - so the line under it settles the question. ``px.read("flow.dat", fmt=".tec")`` still forces the issue,
+  and writing to ``.dat`` needs ``fmt=".tec"`` because an output file has no content to inspect.
+- A variable that is not finite throughout is not written. The format spells no missing value, so a NaN - which is what a field covering part of a mesh carries over the rest of it - would go out as the token ``nan``, and a zone holding one is a zone no reader loads.
+- Binary Tecplot (``.plt``) is registered so it fails with a clear message rather than not
+  resolving at all; only the ASCII flavour is parsed.
 
 .. seealso::
 

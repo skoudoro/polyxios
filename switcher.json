@@ -5,9 +5,14 @@
     "url": "https://polyxios.org/dev/"
   },
   {
-    "name": "0.3.0 (stable)",
-    "version": "0.3.0",
+    "name": "0.5.0 (stable)",
+    "version": "0.5.0",
     "url": "https://polyxios.org/stable/",
     "preferred": true
+  },
+  {
+    "name": "0.3.0",
+    "version": "0.3.0",
+    "url": "https://polyxios.org/0.3.0/"
   }
 ]

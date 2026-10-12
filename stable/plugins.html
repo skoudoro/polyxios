@@ -43,7 +43,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/css/retro.css?v=01cf4d0a" />
+    <link rel="stylesheet" type="text/css" href="_static/css/retro.css?v=fb81dddc" />
   
   <!-- So that users can add custom icons -->
   <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
@@ -51,7 +51,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
 
-    <script src="_static/documentation_options.js?v=e259d695"></script>
+    <script src="_static/documentation_options.js?v=1dd76d02"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -60,7 +60,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://polyxios.org/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.3';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.5.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             true;
         </script>
@@ -73,8 +73,8 @@
     <link rel="prev" title="Command line interface (pxios)" href="cli.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.3" />
-    <meta name="docbuild:last-update" content="2026-08-31"/>
+  <meta name="docsearch:version" content="0.5" />
+    <meta name="docbuild:last-update" content="2026-10-12"/>
   
     
     <script src="_static/searchtools.js"></script>
@@ -119,7 +119,7 @@
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 <aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">// fast, clean mesh I/O for Python - one dependency instead of twenty-five</div>
+  <div class="bd-header-announcement__content">// fast, clean mesh I/O for Python - one dependency instead of twenty-seven</div>
 </aside>
 
   
@@ -208,7 +208,7 @@
 </div></div>
       
         <div class="navbar-item">
-<span class="px-pyversion">py&gt;=3.11</span></div>
+<span class="px-pyversion">py&gt;=3.12</span></div>
       
         <div class="navbar-item">
 
@@ -348,7 +348,7 @@
 </div></div>
         
           <div class="navbar-item">
-<span class="px-pyversion">py&gt;=3.11</span></div>
+<span class="px-pyversion">py&gt;=3.12</span></div>
         
           <div class="navbar-item">
 
@@ -428,25 +428,44 @@
 <li class="toctree-l2"><a class="reference internal" href="formats/obj.html">Wavefront OBJ</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/ply.html">Stanford PLY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/stl.html">STL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/3mf.html">3MF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/off.html">OFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/abaqus.html">Abaqus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/avs.html">AVS-UCD</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/meshb.html">Medit binary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/medit.html">Medit ASCII</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/dolfin.html">DOLFIN / FEniCS XML</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/flac3d.html">FLAC3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/gltf.html">glTF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/collada.html">COLLADA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/gmsh.html">Gmsh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/nastran.html">Nastran</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/tecplot.html">Tecplot ASCII</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/su2.html">SU2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/tetgen.html">TetGen</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/wkt.html">Well-Known Text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/vtu.html">VTK UnstructuredGrid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/vts.html">VTK StructuredGrid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/vti.html">VTK ImageData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/vtkhdf.html">VTKHDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/pvd.html">PVD (ParaView collection)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/mfem.html">MFEM mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/netgen.html">Netgen</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/ugrid.html">UGRID (AFLR)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats/splat.html">Gaussian splat</a></li>
-<li class="toctree-l2"><a class="reference internal" href="formats/vtu.html">VTK UnstructuredGrid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="formats/vts.html">VTK StructuredGrid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="formats/vti.html">VTK ImageData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/pcd.html">PCD (Point Cloud Library)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/las.html">LAS / LAZ (ASPRS LiDAR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/xyz.html">ASCII point clouds: XYZ, PTS, PTX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/mdpa.html">Kratos MDPA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/permas.html">PERMAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/fluent.html">ANSYS Fluent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/svg.html">SVG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/xdmf.html">XDMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/med.html">MED</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/cgns.html">CGNS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/h5m.html">H5M (MOAB)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/hmf.html">HMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats/exodus.html">Exodus II</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="lazy_loading.html">lazy_loading.rst</a></li>
@@ -465,7 +484,16 @@
 <li class="toctree-l3"><a class="reference internal" href="api/generated/polyxios.helper.html">polyxios.helper</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.SceneData.html">polyxios.SceneData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.SceneNode.html">polyxios.SceneNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.SceneMaterial.html">polyxios.SceneMaterial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.SceneTexture.html">polyxios.SceneTexture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.SceneImage.html">polyxios.SceneImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.read_scene.html">polyxios.read_scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.write_scene.html">polyxios.write_scene</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.transforms.html">polyxios.transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.helper.html">polyxios.helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.fetcher.html">polyxios.fetcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.validate.html">polyxios.validate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/generated/polyxios.exceptions.html">polyxios.exceptions</a></li>
 </ul>
@@ -571,6 +599,62 @@ configuration, no restart needed:</p>
 <code class="docutils literal notranslate"><span class="pre">&quot;.ABC&quot;</span></code> - a key the resolver cannot reach is worse than none.</p>
 </div>
 </section>
+<section id="extensions-several-formats-share">
+<h2>Extensions several formats share<a class="headerlink" href="#extensions-several-formats-share" title="Link to this heading">#</a></h2>
+<p>An extension no format owns outright - <code class="docutils literal notranslate"><span class="pre">.dat</span></code> belongs to Tecplot, Nastran,
+LS-DYNA and plain ASCII tables alike - is resolved by looking inside the file.
+Among the codecs polyxios ships, one competing for such an extension lists it
+under <code class="docutils literal notranslate"><span class="pre">SNIFF_EXTENSIONS</span></code> and supplies <code class="docutils literal notranslate"><span class="pre">sniff(head:</span> <span class="pre">bytes)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>, which
+answers whether the opening bytes look like its format; <code class="docutils literal notranslate"><span class="pre">SNIFF_PRIORITY</span></code>
+orders the attempts, lowest first, so a narrow test runs ahead of a broad one.
+The extension then resolves to a dispatcher that delegates to the first codec
+recognising the file, and names the candidates when none does. Writing needs an
+owner, an output file having no content to inspect: the codec that owns the
+extension keeps the writes by declaring <code class="docutils literal notranslate"><span class="pre">SNIFF_DEFAULT_WRITER</span></code>, and without
+one a bare write raises and asks for <code class="docutils literal notranslate"><span class="pre">fmt=</span></code>.</p>
+<p>An entry point is a claim, not a competitor. It registers one extension, it is
+registered last, and it replaces whatever held that key - a dispatcher
+included: installing a codec for <code class="docutils literal notranslate"><span class="pre">.dat</span></code> is a deliberate choice by the person
+installing it, and it wins over polyxios’ own guess at the file’s content.</p>
+</section>
+<section id="reading-a-path-or-a-buffer">
+<h2>Reading a path or a buffer<a class="headerlink" href="#reading-a-path-or-a-buffer" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">path</span></code> is whatever the caller passed <code class="docutils literal notranslate"><span class="pre">read()</span></code> or <code class="docutils literal notranslate"><span class="pre">write()</span></code>: a path, or
+an open file object. Opening it yourself would refuse the second, so use the
+helpers in <code class="xref py py-mod docutils literal notranslate"><span class="pre">polyxios._io</span></code>, which take either:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">polyxios._io</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span><span class="p">,</span> <span class="n">write_text</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PolyData</span><span class="p">:</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">read_text</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+    <span class="o">...</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">poly</span><span class="p">:</span> <span class="n">PolyData</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">write_text</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">read_bytes</span></code> / <code class="docutils literal notranslate"><span class="pre">write_bytes</span></code> are the binary pair, <code class="docutils literal notranslate"><span class="pre">open_read</span></code> /
+<code class="docutils literal notranslate"><span class="pre">open_write</span></code> yield a binary handle for a codec that streams, <code class="docutils literal notranslate"><span class="pre">open_text</span></code>
+yields one to iterate line by line, and <code class="docutils literal notranslate"><span class="pre">open_block</span></code> gives a binary parser
+the whole file at once - mapped for a path, read into memory for a buffer.
+<code class="docutils literal notranslate"><span class="pre">source_name</span></code> and <code class="docutils literal notranslate"><span class="pre">source_suffix</span></code> are what an error message should quote,
+since a buffer has no <code class="docutils literal notranslate"><span class="pre">Path</span></code> to ask.</p>
+<p>Going through the helpers is also what gives a codec gzip for free: the
+decompression happens inside them, so a codec that opened the path itself
+would be the only format in the library that cannot read a <code class="docutils literal notranslate"><span class="pre">.gz</span></code>.</p>
+<p>A codec that genuinely needs a file on disk - a format split across sibling
+files, say - calls <code class="docutils literal notranslate"><span class="pre">require_path(path,</span> <span class="pre">fmt=...,</span> <span class="pre">reason=...)</span></code>, which returns
+a <code class="docutils literal notranslate"><span class="pre">Path</span></code> or refuses the buffer with a message naming why. It refuses a
+compressed one too: a codec opening its own files is not going through the
+layer that unwraps gzip, so a <code class="docutils literal notranslate"><span class="pre">.gz</span></code> there would be parsed as text.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">reading=True</span></code> on the way in, where the file already holds bytes to
+look at, so a file compressed without being renamed is caught by its content
+the way it is everywhere else. Leave it unset on the way out: a destination
+holds either nothing or the file about to be replaced, and reading that one
+would refuse a plain write for the sake of whatever happened to be sitting
+there. <code class="docutils literal notranslate"><span class="pre">require_path</span></code> only ever sees the path the caller named, so a codec
+that then opens siblings of its own has to check those itself - <code class="docutils literal notranslate"><span class="pre">is_gzip</span></code>
+takes a path and answers in four bytes.</p>
+</section>
 </section>
 
 
@@ -622,6 +706,8 @@ configuration, no restart needed:</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-write-a-codec">Step 1 - write a codec</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-declare-an-entry-point">Step 2 - declare an entry point</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extensions-several-formats-share">Extensions several formats share</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-a-path-or-a-buffer">Reading a path or a buffer</a></li>
 </ul>
   </nav></div>
 
@@ -679,7 +765,7 @@ configuration, no restart needed:</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="last-updated">
-  Last updated on 2026-08-31.
+  Last updated on 2026-10-12.
   <br/>
 </p></div>
       
